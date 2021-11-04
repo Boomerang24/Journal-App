@@ -8,6 +8,10 @@ const initialState = {
 export const uiReducer = ( state = initialState, action ) => {
     switch (action.type) {
         case types.uiSetError:
+            console.log({
+                ...state, 
+                msgError: action.payload
+            });
             return {
                 ...state, 
                 msgError: action.payload
