@@ -1,15 +1,58 @@
-import { getAuth, signInWithPopup } from 'firebase/auth';
+import Swal from 'sweetalert2';
+import { 
+    getAuth,
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    updateProfile,
+    signInWithEmailAndPassword,
+    signOut 
+} from 'firebase/auth';
 import { googleAuthProvider } from "../firebase/firebase-config";
 import { types } from "../types/types";
+import { finishLoading, startLoading } from './ui';
+import { noteLogout } from './notes';
 
 export const startLoginEmailPass = ( email, password ) => {
     return ( dispatch ) => { // es un callback, ocupa el dispatch del THUNK-Middleware
 
-        setTimeout(() => {
-            
-            dispatch( login( email, password ) );
+        dispatch( startLoading() );
 
-        }, 3500);
+        const auth = getAuth();
+        signInWithEmailAndPassword(auth, email, password)
+            .then( ({ user }) => {
+                dispatch( login( user.uid, user.displayName ));
+                
+                dispatch( finishLoading() );
+            })
+            .catch( e => {
+                // console.log(e);
+                dispatch( finishLoading() );
+                if ( e.message.includes('password') ){
+
+                    Swal.fire('Error', 'Incorrect Password', 'error');
+
+                } else {
+                    Swal.fire('Error', `There is no user registered with the email: "${ email }"`, 'error');
+                }
+            })
+    }
+}
+
+export const startRegisterWithEmailPasswordName = ( email, password, name) => {
+    return ( dispatch ) => { // es un callback, ocupa el dispatch del THUNK-Middleware
+
+        const auth = getAuth();
+        createUserWithEmailAndPassword( auth, email, password )
+            .then( async({ user }) => {
+
+                await updateProfile( user, { displayName: name});
+                
+                dispatch( login( user.uid, user.displayName ) );                
+            })
+            .catch( e => {
+                // console.log(e);
+                Swal.fire('Error', `Email "${email}" is already in use`, 'error');
+            })
     }
 }
 
@@ -32,6 +75,20 @@ export const login = (uid, displayName) => ({
             uid,
             displayName
         }
+});
+
+export const startLogout = () => {
+    return async( dispatch ) => {
+        const auth = getAuth();
+        await signOut(auth);
+
+        dispatch( logout() );
+        dispatch( noteLogout() );
+    }
+}
+
+export const logout = () => ({
+    type: types.logout
 })
 
 // Lo mismo que arriba pero simplificado

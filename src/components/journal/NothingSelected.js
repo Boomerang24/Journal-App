@@ -10,7 +10,7 @@ export const NothingSelected = () => {
 
             </p>
             
-            <i class="far fa-lightbulb fa-4x mt-5"></i>
+            <i className="far fa-lightbulb fa-4x mt-5"></i>
             
         </div>
     )

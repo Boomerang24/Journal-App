@@ -1,29 +1,51 @@
-import React from 'react'
+import React from 'react';
+import moment from 'moment';
+import { activeNote } from '../../actions/notes';
+import { useDispatch } from 'react-redux';
 
-export const JournalEntry = () => {
+export const JournalEntry = ({ id, date, title, body, url }) => {
+
+    const noteDate = moment( date );
+
+    const dispatch = useDispatch();
+
+    const handleEntryClick = () => {
+        dispatch(
+            activeNote( id, {
+                date, title, body, url
+            })
+        );
+    }
+
     return (
-        <div className="journal__entry pointer">
+        <div 
+            className="journal__entry pointer animate__animated animate__fadeIn"
+            onClick={ handleEntryClick }
+        >
             
-            <div 
-                className="journal__entry-picture"
-                style={{ // En React debe de ser un objeto para especificar el estilo del elemento
-                    backgroundSize: 'cover',
-                    backgroundImage: 'url(https://i0.wp.com/wallpapersfortech.com/wp-content/uploads/2021/03/fc5b092.jpg?fit=780%2C1689&ssl=1)'
-                }}
-            />
+            {
+                url && 
+                <div 
+                    className="journal__entry-picture"
+                    style={{ // En React debe de ser un objeto para especificar el estilo del elemento
+                        backgroundSize: 'cover',
+                        backgroundImage: `url(${ url })`
+                    }}
+                />
+            }
 
             <div className="journal__entry-body">
                 <p className="journal__entry-title">
-                    Un nuevo dia
+                    { title }
                 </p>
                 <p className="journal__entry-content">
-                    Amet qui aliquip sint quis pariatur consequat qui laboris labore.
+                    { body }
                 </p>
             </div>
 
             <div className="journal__entry-date-box">
-                <span>Monday</span>
-                <h4>28</h4>
+                <span> { noteDate.format('dddd') } </span>
+                <h4> { noteDate.format('Do') } </h4>
             </div>
 
         </div>

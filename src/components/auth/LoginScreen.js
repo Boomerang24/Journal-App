@@ -1,25 +1,47 @@
-import React from 'react'
-import { useDispatch } from 'react-redux'
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import validator from 'validator';
 
-import { Link } from 'react-router-dom'
 import { startGoogleLogin, startLoginEmailPass } from '../../actions/auth'
-import { useForm } from '../../hooks/useForm'
+import { removeErrorAction, setErrorAction } from '../../actions/ui';
+import { useForm } from '../../hooks/useForm';
 
 export const LoginScreen = () => {
 
     const dispatch = useDispatch(); 
     // useDispatch da acceso al dispatch de acciones/actions
 
+    const { msgError } = useSelector( state => state.ui );
+    const { loading } = useSelector( state => state.ui );
+
     const [ formValues, handleInputChange ] = useForm({
-        email: 'megan@gmail.com',
-        password: '12345',
+        email: 'nando@gmail.com',
+        password: '123456',
     });
 
     const { email, password } = formValues;
 
     const handleLogin = (e) => {
         e.preventDefault();
-        dispatch( startLoginEmailPass( email, password ));
+
+        if ( isUserValid() ){
+            dispatch( startLoginEmailPass( email, password ));
+        }
+    }
+
+    const isUserValid = () => {
+        if ( !validator.isEmail( email )){
+            dispatch( setErrorAction('Email is not valid'));
+            return false;
+        } else if ( password.length < 5 ){
+            dispatch( setErrorAction('Password should be at least 6 characters long!') );
+            return false;
+        }
+
+        dispatch( removeErrorAction() );
+
+        return true;
     }
 
     const handleGoogleLogin = () => {
@@ -30,7 +52,19 @@ export const LoginScreen = () => {
         <>
             <h3 className="auth__title">Login</h3>
 
-            <form onSubmit={ handleLogin }>
+            <form 
+                onSubmit={ handleLogin }
+                className="animate__animated animate__fadeIn animate__faster"
+            >
+
+                {
+                    msgError && 
+                    (
+                        <div className="auth__alert-error">
+                            {msgError}
+                        </div>
+                    )
+                }
 
                 <input 
                     type="text"
@@ -54,6 +88,7 @@ export const LoginScreen = () => {
                 <button
                     type="submit"
                     className="btn btn-primary btn-block"
+                    disabled={ loading }
                 >
                     Login
                 </button>
