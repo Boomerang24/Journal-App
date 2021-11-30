@@ -19,14 +19,18 @@ export const startNewNote = () => {
             date: new Date().getTime() // Obtiene la fecha de forma automatica
         }
 
-        const doc = await addDoc(collection(db, `${ uid }`, "journal/notes"), {
-            title: '',
-            body: '',
-            date: new Date().getTime() // Obtiene la fecha de forma automatica
-        });
-
-        dispatch( activeNote( doc.id, newNote) );
-        dispatch( addNewNote( doc.id, newNote ));
+        try {
+            const doc = await addDoc(collection(db, `${ uid }`, "journal/notes"), {
+                title: '',
+                body: '',
+                date: new Date().getTime() // Obtiene la fecha de forma automatica
+            });
+    
+            dispatch( activeNote( doc.id, newNote) );
+            dispatch( addNewNote( doc.id, newNote ));
+        } catch (error) {
+            console.log(error);
+        }
     }
 };
 
